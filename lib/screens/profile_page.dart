@@ -40,47 +40,80 @@ class ProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 28),
               // Avatar
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Container(
-                    width: 120, height: 120,
+              Container(
+                width: 130, 
+                height: 130,
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(35),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.4), 
+                      blurRadius: 30, 
+                      spreadRadius: 5,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(60),
-                      border: Border.all(color: AppColors.primary, width: 3),
-                      boxShadow: [
-                        BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 8)),
-                      ],
+                      color: AppColors.backgroundDark,
+                      borderRadius: BorderRadius.circular(31),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(60),
-                      child: CachedNetworkImage(imageUrl: user.imageUrl, fit: BoxFit.cover),
+                      borderRadius: BorderRadius.circular(31),
+                      child: CachedNetworkImage(
+                        imageUrl: user.imageUrl, 
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                  Container(
-                    width: 36, height: 36,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: AppColors.backgroundDark, width: 3),
-                    ),
-                    child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(user.fullName, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
-                child: Text(
-                  user.membershipLevel.toUpperCase(),
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary, letterSpacing: 1),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                user.fullName, 
+                style: const TextStyle(
+                  fontSize: 26, 
+                  fontWeight: FontWeight.w700, 
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(25),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.verified_rounded,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      user.membershipLevel.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 12, 
+                        fontWeight: FontWeight.w700, 
+                        color: Colors.white, 
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 4),
@@ -252,17 +285,44 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildStatBox(String label, String value, String unit, {bool highlight = false, bool isLink = false}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: highlight ? AppColors.primary.withValues(alpha: 0.3) : AppColors.borderLight),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.surfaceDark.withValues(alpha: 0.9),
+            AppColors.surfaceDark.withValues(alpha: 0.7),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: highlight 
+            ? AppColors.primary.withValues(alpha: 0.5) 
+            : Colors.white.withValues(alpha: 0.08),
+          width: highlight ? 2 : 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontSize: 10, color: Colors.white.withValues(alpha: 0.4), letterSpacing: 1)),
-          const SizedBox(height: 8),
+          Text(
+            label, 
+            style: TextStyle(
+              fontSize: 11, 
+              color: AppColors.textMuted, 
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+          const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -270,8 +330,8 @@ class ProfilePage extends StatelessWidget {
                 child: Text(
                   value,
                   style: TextStyle(
-                    fontSize: isLink ? 14 : 22,
-                    fontWeight: FontWeight.bold,
+                    fontSize: isLink ? 15 : 24,
+                    fontWeight: FontWeight.w700,
                     color: highlight ? AppColors.primary : Colors.white,
                   ),
                 ),
@@ -280,10 +340,23 @@ class ProfilePage extends StatelessWidget {
                 const SizedBox(width: 4),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 2),
-                  child: Text(unit, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.4))),
+                  child: Text(
+                    unit, 
+                    style: TextStyle(
+                      fontSize: 13, 
+                      color: AppColors.textMuted,
+                    ),
+                  ),
                 ),
               ],
-              if (isLink) Text(' ›', style: TextStyle(fontSize: 16, color: Colors.white.withValues(alpha: 0.2))),
+              if (isLink) ...[
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+              ],
             ],
           ),
         ],

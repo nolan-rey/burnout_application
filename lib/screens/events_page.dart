@@ -85,57 +85,98 @@ class _EventsPageState extends State<EventsPage> {
               ),
 
               // Week selector
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: _prevWeek,
-                    icon: const Icon(Icons.chevron_left_rounded, color: AppColors.primary, size: 30),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceDark.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    width: 1,
                   ),
-                  Expanded(
-                    child: SizedBox(
-                      height: 72,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: 7,
-                        itemBuilder: (context, index) {
-                          final day = _weekStart.add(Duration(days: index));
-                          final isSelected = day.day == _selectedDate.day &&
-                              day.month == _selectedDate.month &&
-                              day.year == _selectedDate.year;
-                          final isToday = day.day == DateTime.now().day &&
-                              day.month == DateTime.now().month &&
-                              day.year == DateTime.now().year;
-                          final dayNames = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
-                          return GestureDetector(
-                            onTap: () => _selectDate(day),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 48,
-                              margin: const EdgeInsets.symmetric(horizontal: 3),
-                              decoration: BoxDecoration(
-                                color: isSelected ? AppColors.primary : (isToday ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent),
-                                borderRadius: BorderRadius.circular(14),
-                                border: isToday && !isSelected ? Border.all(color: AppColors.primary.withValues(alpha: 0.4)) : null,
+                ),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: _prevWeek,
+                      icon: const Icon(Icons.chevron_left_rounded, color: AppColors.primary, size: 28),
+                    ),
+                    Expanded(
+                      child: SizedBox(
+                        height: 76,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 7,
+                          itemBuilder: (context, index) {
+                            final day = _weekStart.add(Duration(days: index));
+                            final isSelected = day.day == _selectedDate.day &&
+                                day.month == _selectedDate.month &&
+                                day.year == _selectedDate.year;
+                            final isToday = day.day == DateTime.now().day &&
+                                day.month == DateTime.now().month &&
+                                day.year == DateTime.now().year;
+                            final dayNames = ['LUN', 'MAR', 'MER', 'JEU', 'VEN', 'SAM', 'DIM'];
+
+                            return GestureDetector(
+                              onTap: () => _selectDate(day),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                width: 54,
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                decoration: BoxDecoration(
+                                  gradient: isSelected ? AppColors.primaryGradient : null,
+                                  color: isSelected
+                                    ? null
+                                    : (isToday ? AppColors.primary.withValues(alpha: 0.1) : Colors.transparent),
+                                  borderRadius: BorderRadius.circular(18),
+                                  border: isToday && !isSelected
+                                    ? Border.all(color: AppColors.primary.withValues(alpha: 0.4), width: 1.5)
+                                    : null,
+                                  boxShadow: isSelected ? [
+                                    BoxShadow(
+                                      color: AppColors.primary.withValues(alpha: 0.4),
+                                      blurRadius: 12,
+                                      spreadRadius: 2,
+                                    ),
+                                  ] : null,
+                                ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      dayNames[index],
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected ? Colors.white : AppColors.textMuted,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      '${day.day}',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: isSelected
+                                          ? Colors.white
+                                          : (isToday ? AppColors.primary : AppColors.textSecondary),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(dayNames[index], style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: isSelected ? Colors.white : AppColors.textMuted)),
-                                  const SizedBox(height: 4),
-                                  Text('${day.day}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isSelected ? Colors.white : (isToday ? AppColors.primary : AppColors.textSecondary))),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  IconButton(
-                    onPressed: _nextWeek,
-                    icon: const Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 30),
-                  ),
-                ],
+                    IconButton(
+                      onPressed: _nextWeek,
+                      icon: const Icon(Icons.chevron_right_rounded, color: AppColors.primary, size: 28),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -164,32 +205,85 @@ class _EventsPageState extends State<EventsPage> {
               // Challenge progress
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: const Text('Progression du défi', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(
+                        Icons.emoji_events_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Progression du défi', 
+                            style: TextStyle(
+                              fontSize: 18, 
+                              fontWeight: FontWeight.w700, 
+                              color: Colors.white,
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Continuez votre série !',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 12),
               // Days grid
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 child: Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                  spacing: 10,
+                  runSpacing: 10,
                   children: List.generate(_challenge.totalDays, (i) {
                     final isCompleted = i < _challenge.completedDays;
                     final isCurrent = i == _challenge.completedDays;
                     return Container(
-                      width: 40, height: 40,
+                      width: 44, 
+                      height: 44,
                       decoration: BoxDecoration(
-                        color: AppColors.surfaceDark,
-                        borderRadius: BorderRadius.circular(20),
+                        gradient: isCompleted ? AppColors.primaryGradient : null,
+                        color: isCompleted 
+                          ? null 
+                          : AppColors.surfaceDark.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(14),
                         border: Border.all(
-                          color: isCompleted ? AppColors.primary : (isCurrent ? AppColors.primary.withValues(alpha: 0.5) : AppColors.borderSubtle.withValues(alpha: 0.3)),
-                          width: isCompleted ? 2 : 1,
+                          color: isCompleted 
+                            ? Colors.transparent
+                            : (isCurrent ? AppColors.primary : Colors.white.withValues(alpha: 0.08)),
+                          width: isCurrent ? 2 : 1,
                         ),
                       ),
                       child: Center(
                         child: isCompleted
-                            ? const Icon(Icons.check_rounded, size: 18, color: AppColors.primary)
-                            : Text('${i + 1}', style: TextStyle(fontSize: 13, color: isCurrent ? AppColors.textSecondary : AppColors.textMuted)),
+                            ? const Icon(Icons.check_rounded, size: 20, color: Colors.white)
+                            : Text(
+                                '${i + 1}', 
+                                style: TextStyle(
+                                  fontSize: 14, 
+                                  fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+                                  color: isCurrent ? AppColors.primary : AppColors.textMuted,
+                                ),
+                              ),
                       ),
                     );
                   }),
@@ -245,12 +339,29 @@ class _EventsPageState extends State<EventsPage> {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SessionDetailPage())),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: AppColors.surfaceDark,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.borderSubtle.withValues(alpha: 0.3)),
+          gradient: LinearGradient(
+            colors: [
+              AppColors.surfaceDark.withValues(alpha: 0.9),
+              AppColors.surfaceDark.withValues(alpha: 0.7),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.08),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,43 +369,105 @@ class _EventsPageState extends State<EventsPage> {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(session.type, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  child: Text(
+                    session.type, 
+                    style: const TextStyle(
+                      fontSize: 11, 
+                      fontWeight: FontWeight.w700, 
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(6),
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(session.weekLabel, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                  child: Text(
+                    session.weekLabel, 
+                    style: const TextStyle(
+                      fontSize: 11, 
+                      color: AppColors.textMuted,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Text(session.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-            const SizedBox(height: 4),
-            Text(session.programName, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-            const SizedBox(height: 12),
-            Divider(color: AppColors.borderSubtle.withValues(alpha: 0.5), height: 1),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(Icons.access_time_rounded, size: 16, color: AppColors.textMuted),
-                const SizedBox(width: 6),
-                Text('${session.time.inHours}h${(session.time.inMinutes % 60).toString().padLeft(2, '0')}', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
-                const SizedBox(width: 20),
-                if (session.coach != null) ...[
-                  const Icon(Icons.person_rounded, size: 16, color: AppColors.textMuted),
-                  const SizedBox(width: 6),
-                  Text(session.coach!.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white)),
+            const SizedBox(height: 14),
+            Text(
+              session.title, 
+              style: const TextStyle(
+                fontSize: 20, 
+                fontWeight: FontWeight.w700, 
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              session.programName, 
+              style: TextStyle(
+                fontSize: 14, 
+                color: AppColors.textMuted,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.access_time_rounded, 
+                    size: 18, 
+                    color: AppColors.primaryLight,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${session.time.inHours}h${(session.time.inMinutes % 60).toString().padLeft(2, '0')}', 
+                    style: const TextStyle(
+                      fontSize: 15, 
+                      fontWeight: FontWeight.w600, 
+                      color: Colors.white,
+                    ),
+                  ),
+                  if (session.coach != null) ...[
+                    const SizedBox(width: 16),
+                    Container(
+                      width: 1,
+                      height: 16,
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(
+                      Icons.person_rounded, 
+                      size: 18, 
+                      color: AppColors.primaryLight,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      session.coach!.name, 
+                      style: const TextStyle(
+                        fontSize: 15, 
+                        fontWeight: FontWeight.w600, 
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ],
         ),

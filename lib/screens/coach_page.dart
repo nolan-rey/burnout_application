@@ -45,21 +45,28 @@ class _CoachPageState extends State<CoachPage> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
-                height: 48,
+                height: 52,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceDark,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: AppColors.borderSubtle.withValues(alpha: 0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
                 ),
                 child: TextField(
                   onChanged: (v) => setState(() => _searchQuery = v),
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.textMuted.withValues(alpha: 0.5)),
+                    prefixIcon: Icon(Icons.search_rounded, color: AppColors.primaryLight.withValues(alpha: 0.7)),
                     hintText: 'Rechercher un coach',
-                    hintStyle: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.5)),
+                    hintStyle: TextStyle(color: AppColors.textMuted.withValues(alpha: 0.6)),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
               ),
@@ -82,12 +89,26 @@ class _CoachPageState extends State<CoachPage> {
 
   Widget _buildCoachCard(Coach coach) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderSubtle.withValues(alpha: 0.3)),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.surfaceDark.withValues(alpha: 0.9),
+            AppColors.surfaceDark.withValues(alpha: 0.7),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -97,31 +118,54 @@ class _CoachPageState extends State<CoachPage> {
               Stack(
                 children: [
                   Container(
-                    width: 56, height: 56,
+                    width: 64, height: 64,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.2), width: 2),
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                        ),
+                      ],
                     ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(28),
-                      child: CachedNetworkImage(imageUrl: coach.imageUrl, fit: BoxFit.cover),
+                    child: Padding(
+                      padding: const EdgeInsets.all(3),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.backgroundDark,
+                          borderRadius: BorderRadius.circular(17),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(17),
+                          child: CachedNetworkImage(imageUrl: coach.imageUrl, fit: BoxFit.cover),
+                        ),
+                      ),
                     ),
                   ),
                   if (coach.isAvailable)
                     Positioned(
                       right: 0, bottom: 0,
                       child: Container(
-                        width: 14, height: 14,
+                        width: 16, height: 16,
                         decoration: BoxDecoration(
                           color: AppColors.success,
-                          borderRadius: BorderRadius.circular(7),
-                          border: Border.all(color: AppColors.surfaceDark, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: AppColors.backgroundDark, width: 3),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.success.withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              spreadRadius: 1,
+                            ),
+                          ],
                         ),
                       ),
                     ),
                 ],
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 16),
               // Info
               Expanded(
                 child: Column(
@@ -129,44 +173,69 @@ class _CoachPageState extends State<CoachPage> {
                   children: [
                     Row(
                       children: [
-                        Text(coach.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                        Text(coach.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                         if (coach.isPro) ...[
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 10),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              borderRadius: BorderRadius.circular(4),
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(6),
                             ),
-                            child: const Text('PRO', style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Colors.white)),
+                            child: const Text(
+                              'PRO', 
+                              style: TextStyle(
+                                fontSize: 10, 
+                                fontWeight: FontWeight.w800, 
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
                           ),
                         ],
                       ],
                     ),
-                    const SizedBox(height: 2),
-                    Text(coach.specialty, style: const TextStyle(fontSize: 13, color: AppColors.primary)),
-                    const SizedBox(height: 2),
-                    Text(coach.availability, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+                    const SizedBox(height: 4),
+                    Text(coach.specialty, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryLight)),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule_rounded, 
+                          size: 14, 
+                          color: AppColors.textMuted,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          coach.availability, 
+                          style: const TextStyle(
+                            fontSize: 13, 
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 18),
           Row(
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 40,
+                  height: 44,
                   child: ElevatedButton.icon(
                     onPressed: () {},
-                    icon: const Icon(Icons.chat_bubble_rounded, size: 16),
-                    label: const Text('Message', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    icon: const Icon(Icons.chat_bubble_rounded, size: 18),
+                    label: const Text('Message', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 8,
+                      shadowColor: AppColors.primary.withValues(alpha: 0.3),
                     ),
                   ),
                 ),
@@ -174,15 +243,15 @@ class _CoachPageState extends State<CoachPage> {
               const SizedBox(width: 12),
               Expanded(
                 child: SizedBox(
-                  height: 40,
+                  height: 44,
                   child: OutlinedButton.icon(
                     onPressed: coach.isAvailable ? () {} : null,
-                    icon: const Icon(Icons.phone_rounded, size: 16),
-                    label: const Text('Appeler', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                    icon: const Icon(Icons.phone_rounded, size: 18),
+                    label: const Text('Appeler', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      foregroundColor: coach.isAvailable ? Colors.white : AppColors.textMuted,
+                      side: BorderSide(color: coach.isAvailable ? Colors.white.withValues(alpha: 0.15) : Colors.white.withValues(alpha: 0.05)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
