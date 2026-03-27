@@ -1,8 +1,10 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../services/mock_data_service.dart';
+import '../widgets/glass_card.dart';
 import 'challenge_page.dart';
 import 'session_detail_page.dart';
 
@@ -18,46 +20,121 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.backgroundDark,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header avec avatar et notif
-              _buildHeader(user),
-              const SizedBox(height: 24),
+      body: Stack(
+        children: [
+          // Background orbs for glass depth effect
+          _buildBackgroundOrbs(),
 
-              // Welcome message
-              _buildWelcome(user),
-              const SizedBox(height: 28),
-
-              // Gym Access Card - Design premium
-              _buildGymAccessCard(),
-              const SizedBox(height: 24),
-
-              // Stats modernes
-              _buildStats(user),
-              const SizedBox(height: 28),
-
-              // Prochaine séance
-              _buildSectionTitle('Prochaine Séance', onSeeAll: () {}),
-              const SizedBox(height: 12),
-              _buildSessionCard(context, session),
-              const SizedBox(height: 28),
-
-              // Banner événements
-              _buildEventsBanner(),
-              const SizedBox(height: 28),
-
-              // Défis
-              _buildSectionTitle('Défis en cours', onSeeAll: () {}),
-              const SizedBox(height: 12),
-              _buildChallengesList(challenges),
-              const SizedBox(height: 32),
-            ],
+          // Main content
+          SafeArea(
+            bottom: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(user),
+                  const SizedBox(height: 24),
+                  _buildWelcome(user),
+                  const SizedBox(height: 28),
+                  _buildGymAccessCard(),
+                  const SizedBox(height: 24),
+                  _buildStats(user),
+                  const SizedBox(height: 28),
+                  _buildSectionTitle('Prochaine Séance', onSeeAll: () {}),
+                  const SizedBox(height: 12),
+                  _buildSessionCard(context, session),
+                  const SizedBox(height: 28),
+                  _buildEventsBanner(),
+                  const SizedBox(height: 28),
+                  _buildSectionTitle('Défis en cours', onSeeAll: () {}),
+                  const SizedBox(height: 12),
+                  _buildChallengesList(challenges),
+                  // Extra padding for bottom nav bar
+                  const SizedBox(height: 120),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackgroundOrbs() {
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          Positioned(
+            top: -80,
+            right: -60,
+            child: Container(
+              width: 280,
+              height: 280,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.2),
+                    AppColors.primary.withValues(alpha: 0.05),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 300,
+            left: -100,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF8B5CF6).withValues(alpha: 0.12),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 200,
+            right: -80,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.info.withValues(alpha: 0.1),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -50,
+            left: -40,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.primaryLight.withValues(alpha: 0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -68,43 +145,60 @@ class HomePage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Notification button
-          Container(
-            width: 48, 
-            height: 48,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceDark.withValues(alpha: 0.8),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const Icon(Icons.notifications_none_rounded, color: AppColors.textSecondary, size: 24),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
+          // Notification button — glass style
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: AppColors.glassGradient,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border(
+                    top: BorderSide(color: AppColors.glassHighlight, width: 0.8),
+                    left: BorderSide(color: AppColors.glassBorder, width: 0.5),
+                    right: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 0.5),
+                    bottom: BorderSide(color: Colors.white.withValues(alpha: 0.03), width: 0.5),
                   ),
                 ),
-              ],
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Icon(Icons.notifications_none_rounded, color: AppColors.textSecondary, size: 24),
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          borderRadius: BorderRadius.circular(4),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.5),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          
+
           // Avatar
           Container(
-            width: 50, 
+            width: 50,
             height: 50,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
               border: Border.all(
-                color: AppColors.primary.withValues(alpha: 0.4), 
+                color: AppColors.primary.withValues(alpha: 0.4),
                 width: 2,
               ),
               boxShadow: [
@@ -118,7 +212,7 @@ class HomePage extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: CachedNetworkImage(
-                imageUrl: user.imageUrl, 
+                imageUrl: user.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -137,7 +231,7 @@ class HomePage extends StatelessWidget {
           Text(
             'Bonjour,',
             style: TextStyle(
-              fontSize: 16, 
+              fontSize: 16,
               color: AppColors.textMuted,
               fontWeight: FontWeight.w500,
             ),
@@ -150,9 +244,9 @@ class HomePage extends StatelessWidget {
             child: Text(
               user.firstName,
               style: const TextStyle(
-                fontSize: 32, 
-                fontWeight: FontWeight.w800, 
-                color: Colors.white, 
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                color: Colors.white,
                 letterSpacing: -0.5,
               ),
             ),
@@ -180,7 +274,7 @@ class HomePage extends StatelessWidget {
                 Text(
                   'Prêt à brûler des calories ?',
                   style: TextStyle(
-                    fontSize: 13, 
+                    fontSize: 13,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
@@ -235,7 +329,7 @@ class HomePage extends StatelessWidget {
                       child: const Text(
                         'ACCÈS RAPIDE',
                         style: TextStyle(
-                          fontSize: 10, 
+                          fontSize: 10,
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1,
@@ -246,8 +340,8 @@ class HomePage extends StatelessWidget {
                     const Text(
                       'Accès Salle',
                       style: TextStyle(
-                        fontSize: 26, 
-                        fontWeight: FontWeight.w800, 
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     ),
@@ -255,28 +349,49 @@ class HomePage extends StatelessWidget {
                     Text(
                       'Tapez pour ouvrir la porte',
                       style: TextStyle(
-                        fontSize: 14, 
+                        fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
                 ),
               ),
-              Container(
-                width: 72, 
-                height: 72,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 2,
+              // Glass icon container
+              ClipRRect(
+                borderRadius: BorderRadius.circular(22),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: Container(
+                    width: 72,
+                    height: 72,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border(
+                        top: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.4),
+                          width: 0.8,
+                        ),
+                        left: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 0.5,
+                        ),
+                        right: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.05),
+                          width: 0.5,
+                        ),
+                        bottom: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.03),
+                          width: 0.5,
+                        ),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.sensors_rounded,
+                      size: 32,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                child: const Icon(
-                  Icons.sensors_rounded, 
-                  size: 32, 
-                  color: Colors.white,
                 ),
               ),
             ],
@@ -293,9 +408,9 @@ class HomePage extends StatelessWidget {
         children: [
           Expanded(
             child: _buildStatCard(
-              Icons.calendar_today_rounded, 
-              'VISITES', 
-              '${user.weeklyVisits}', 
+              Icons.calendar_today_rounded,
+              'VISITES',
+              '${user.weeklyVisits}',
               'cette semaine',
               AppColors.primary,
             ),
@@ -303,9 +418,9 @@ class HomePage extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(
             child: _buildStatCard(
-              Icons.local_fire_department_rounded, 
-              'CALORIES', 
-              '${user.caloriesBurned}', 
+              Icons.local_fire_department_rounded,
+              'CALORIES',
+              '${user.caloriesBurned}',
               'kcal brûlées',
               AppColors.warning,
             ),
@@ -316,30 +431,11 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildStatCard(IconData icon, String label, String value, String unit, Color accentColor) {
-    return Container(
+    return GlassCard(
+      blurStrength: 24,
+      borderRadius: 24,
+      glowColor: accentColor,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.surfaceDark.withValues(alpha: 0.9),
-            AppColors.surfaceDark.withValues(alpha: 0.6),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -352,18 +448,18 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
-                  icon, 
-                  size: 18, 
+                  icon,
+                  size: 18,
                   color: accentColor,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
-                label, 
+                label,
                 style: TextStyle(
-                  fontSize: 11, 
-                  color: AppColors.textMuted, 
-                  fontWeight: FontWeight.w600, 
+                  fontSize: 11,
+                  color: AppColors.textMuted,
+                  fontWeight: FontWeight.w600,
                   letterSpacing: 0.5,
                 ),
               ),
@@ -371,18 +467,18 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            value, 
+            value,
             style: const TextStyle(
-              fontSize: 28, 
-              fontWeight: FontWeight.w800, 
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
               color: Colors.white,
             ),
           ),
           const SizedBox(height: 2),
           Text(
-            unit, 
+            unit,
             style: TextStyle(
-              fontSize: 12, 
+              fontSize: 12,
               color: AppColors.textMuted,
               fontWeight: FontWeight.w500,
             ),
@@ -399,10 +495,10 @@ class HomePage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            title, 
+            title,
             style: const TextStyle(
-              fontSize: 20, 
-              fontWeight: FontWeight.w700, 
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
             ),
           ),
@@ -416,9 +512,9 @@ class HomePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  'Voir tout', 
+                  'Voir tout',
                   style: TextStyle(
-                    fontSize: 13, 
+                    fontSize: 13,
                     color: AppColors.primary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -433,139 +529,118 @@ class HomePage extends StatelessWidget {
   Widget _buildSessionCard(BuildContext context, session) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GestureDetector(
+      child: GlassCard(
         onTap: () => Navigator.push(
-          context, 
+          context,
           MaterialPageRoute(builder: (_) => const SessionDetailPage()),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.surfaceDark,
-                AppColors.surfaceDark.withValues(alpha: 0.8),
-              ],
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-            ),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.08),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 30,
-                offset: const Offset(0, 12),
+        borderRadius: 28,
+        blurStrength: 20,
+        padding: EdgeInsets.zero,
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(28),
+                bottomLeft: Radius.circular(28),
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28), 
-                  bottomLeft: Radius.circular(28),
-                ),
-                child: SizedBox(
-                  width: 120, 
-                  height: 145,
-                  child: CachedNetworkImage(
-                    imageUrl: session.imageUrl, 
-                    fit: BoxFit.cover,
-                  ),
+              child: SizedBox(
+                width: 120,
+                height: 145,
+                child: CachedNetworkImage(
+                  imageUrl: session.imageUrl,
+                  fit: BoxFit.cover,
                 ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10, 
-                          vertical: 4,
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        session.category.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                          letterSpacing: 0.5,
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      session.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 16,
+                          color: AppColors.textMuted,
                         ),
-                        child: Text(
-                          session.category.toUpperCase(),
+                        const SizedBox(width: 6),
+                        Text(
+                          session.dateTimeDisplay,
                           style: TextStyle(
-                            fontSize: 10, 
-                            fontWeight: FontWeight.w700, 
-                            color: AppColors.primary,
-                            letterSpacing: 0.5,
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      ),
+                      ],
+                    ),
+                    if (session.coach != null) ...[
                       const SizedBox(height: 10),
-                      Text(
-                        session.title, 
-                        style: const TextStyle(
-                          fontSize: 18, 
-                          fontWeight: FontWeight.w700, 
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
                       Row(
                         children: [
-                          Icon(
-                            Icons.access_time_rounded, 
-                            size: 16, 
-                            color: AppColors.textMuted,
+                          Container(
+                            width: 26,
+                            height: 26,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: CachedNetworkImage(
+                                imageUrl: session.coach!.imageUrl,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
-                          const SizedBox(width: 6),
+                          const SizedBox(width: 8),
                           Text(
-                            session.dateTimeDisplay, 
+                            'Coach ${session.coach!.name.split(' ').first}',
                             style: TextStyle(
-                              fontSize: 13, 
+                              fontSize: 12,
                               color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      if (session.coach != null) ...[
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Container(
-                              width: 26, 
-                              height: 26,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: CachedNetworkImage(
-                                  imageUrl: session.coach!.imageUrl, 
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Coach ${session.coach!.name.split(' ').first}', 
-                              style: TextStyle(
-                                fontSize: 12, 
-                                color: AppColors.textSecondary,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
                     ],
-                  ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -574,27 +649,14 @@ class HomePage extends StatelessWidget {
   Widget _buildEventsBanner() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
+      child: GlassCard(
+        borderRadius: 24,
+        blurStrength: 20,
         padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.surfaceDark.withValues(alpha: 0.9),
-              AppColors.surfaceDark.withValues(alpha: 0.6),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
         child: Row(
           children: [
             Container(
-              width: 56, 
+              width: 56,
               height: 56,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -606,8 +668,8 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Icon(
-                Icons.event_rounded, 
-                color: AppColors.accent, 
+                Icons.event_rounded,
+                color: AppColors.accent,
                 size: 26,
               ),
             ),
@@ -617,35 +679,45 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Événements', 
+                    'Événements',
                     style: TextStyle(
-                      fontSize: 17, 
-                      fontWeight: FontWeight.w700, 
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
                       color: Colors.white,
                     ),
                   ),
                   SizedBox(height: 4),
                   Text(
-                    'Compétitions, workshops et plus', 
+                    'Compétitions, workshops et plus',
                     style: TextStyle(
-                      fontSize: 13, 
+                      fontSize: 13,
                       color: AppColors.textSecondary,
                     ),
                   ),
                 ],
               ),
             ),
-            Container(
-              width: 40, 
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(
-                Icons.arrow_forward_ios_rounded, 
-                color: AppColors.textMuted, 
-                size: 18,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      width: 0.5,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: AppColors.textMuted,
+                    size: 18,
+                  ),
+                ),
               ),
             ),
           ],
@@ -665,7 +737,7 @@ class HomePage extends StatelessWidget {
           final c = challenges[index];
           return GestureDetector(
             onTap: () => Navigator.push(
-              context, 
+              context,
               MaterialPageRoute(builder: (_) => ChallengePage(challengeId: c.id)),
             ),
             child: Container(
@@ -689,24 +761,36 @@ class HomePage extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     CachedNetworkImage(
-                      imageUrl: c.imageUrl, 
+                      imageUrl: c.imageUrl,
                       fit: BoxFit.cover,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.8),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                    // Glass overlay at the bottom
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      height: 120,
+                      child: ClipRRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black.withValues(alpha: 0.6),
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
                     Positioned(
-                      left: 20, 
-                      right: 20, 
+                      left: 20,
+                      right: 20,
                       bottom: 18,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -716,7 +800,7 @@ class HomePage extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, 
+                                  horizontal: 12,
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
@@ -724,10 +808,10 @@ class HomePage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  'JOURS ${c.completedDays}/${c.totalDays}', 
+                                  'JOURS ${c.completedDays}/${c.totalDays}',
                                   style: const TextStyle(
-                                    fontSize: 11, 
-                                    fontWeight: FontWeight.w700, 
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -739,7 +823,7 @@ class HomePage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Text(
-                                  '🔥', 
+                                  '🔥',
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ),
@@ -747,10 +831,10 @@ class HomePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            c.title, 
+                            c.title,
                             style: const TextStyle(
-                              fontSize: 19, 
-                              fontWeight: FontWeight.w700, 
+                              fontSize: 19,
+                              fontWeight: FontWeight.w700,
                               color: Colors.white,
                             ),
                           ),

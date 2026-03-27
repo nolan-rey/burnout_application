@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
@@ -175,18 +176,19 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
       ),
       child: Stack(
         children: [
-          // Floating orbs
+          // Vivid floating orbs for glass depth
           Positioned(
-            top: -100,
-            right: -50,
+            top: -80,
+            right: -30,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 320,
+              height: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primary.withValues(alpha: 0.15),
+                    AppColors.primary.withValues(alpha: 0.25),
+                    AppColors.primary.withValues(alpha: 0.08),
                     Colors.transparent,
                   ],
                 ),
@@ -194,16 +196,50 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             ),
           ),
           Positioned(
-            bottom: -150,
-            left: -100,
+            top: 250,
+            left: -80,
             child: Container(
-              width: 400,
-              height: 400,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppColors.primaryLight.withValues(alpha: 0.1),
+                    const Color(0xFF8B5CF6).withValues(alpha: 0.2),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -100,
+            right: -60,
+            child: Container(
+              width: 350,
+              height: 350,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.primaryLight.withValues(alpha: 0.15),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 200,
+            left: 60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppColors.info.withValues(alpha: 0.12),
                     Colors.transparent,
                   ],
                 ),
@@ -265,24 +301,42 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
   }
 
   Widget _buildGlassCard() {
-    return Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        gradient: AppColors.glassGradient,
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 30,
-            offset: const Offset(0, 10),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            gradient: AppColors.liquidGlassGradient,
+            borderRadius: BorderRadius.circular(28),
+            border: Border(
+              top: BorderSide(
+                color: AppColors.glassHighlight,
+                width: 0.8,
+              ),
+              left: BorderSide(
+                color: AppColors.glassBorder,
+                width: 0.5,
+              ),
+              right: BorderSide(
+                color: Colors.white.withValues(alpha: 0.05),
+                width: 0.5,
+              ),
+              bottom: BorderSide(
+                color: Colors.white.withValues(alpha: 0.03),
+                width: 0.5,
+              ),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.glassShadow,
+                blurRadius: 30,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
+          child: Column(
         children: [
           // Email field
           _buildModernTextField(
@@ -337,6 +391,8 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
           _buildLoginButton(),
         ],
       ),
+      ),
+    ),
     );
   }
 

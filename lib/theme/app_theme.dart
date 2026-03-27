@@ -43,13 +43,43 @@ class AppColors {
     end: Alignment.bottomCenter,
   );
   
+  // Liquid Glass colors
+  static Color get glassBg => Colors.white.withValues(alpha: 0.08);
+  static Color get glassBgLight => Colors.white.withValues(alpha: 0.12);
+  static Color get glassBorder => Colors.white.withValues(alpha: 0.15);
+  static Color get glassHighlight => Colors.white.withValues(alpha: 0.25);
+  static Color get glassShadow => Colors.black.withValues(alpha: 0.3);
+
   static LinearGradient get glassGradient => LinearGradient(
     colors: [
-      Colors.white.withValues(alpha: 0.1),
+      Colors.white.withValues(alpha: 0.12),
       Colors.white.withValues(alpha: 0.05),
+      Colors.white.withValues(alpha: 0.02),
     ],
+    stops: const [0.0, 0.5, 1.0],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  static LinearGradient get liquidGlassGradient => LinearGradient(
+    colors: [
+      Colors.white.withValues(alpha: 0.18),
+      Colors.white.withValues(alpha: 0.08),
+      Colors.white.withValues(alpha: 0.03),
+      Colors.white.withValues(alpha: 0.06),
+    ],
+    stops: const [0.0, 0.3, 0.7, 1.0],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  static LinearGradient get glassNavGradient => LinearGradient(
+    colors: [
+      Colors.white.withValues(alpha: 0.12),
+      Colors.white.withValues(alpha: 0.06),
+    ],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
 
   static LinearGradient get darkOverlay => const LinearGradient(
