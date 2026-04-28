@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
@@ -19,24 +20,34 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   // Badge mock — sera remplacé par les données utilisateur réelles
   static const String _mockBadge = 'BADGE:029EC135';
+  final NfcService _nfcService = NfcService();
 
   bool _nfcWriting = false;
 
   Future<void> _onGymAccessTap() async {
     HapticFeedback.mediumImpact();
 
-    final nfc = NfcService();
-    final available = await nfc.isAvailable();
+    final available = await _nfcService.isAvailable();
 
     if (!available) {
-      // NFC non disponible → mode mock : simule une écriture réussie
-      _showNfcMockSheet();
+      final isAndroid =
+          !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      if (isAndroid) {
+        _showNfcResult(
+          success: false,
+          message:
+              'NFC désactivé ou indisponible. Activez-le dans les réglages Android',
+        );
+      } else {
+        // Gardé pour les simulateurs / plateformes sans NFC.
+        _showNfcMockSheet();
+      }
       return;
     }
 
     setState(() => _nfcWriting = true);
 
-    await nfc.writeText(
+    await _nfcService.writeText(
       payload: _mockBadge,
       onSuccess: () {
         if (!mounted) return;
@@ -50,6 +61,12 @@ class _HomePageState extends State<HomePage> {
         _showNfcResult(success: false, message: err);
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _nfcService.stopSession();
+    super.dispose();
   }
 
   /// Sheet simulant l'écriture NFC quand le NFC est indisponible (simulateur / appareil sans NFC).
@@ -85,8 +102,13 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(width: 10),
             Text(
-              success ? 'Accès accordé — Bonne séance !' : (message ?? 'Échec NFC'),
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+              success
+                  ? 'Accès accordé — Bonne séance !'
+                  : (message ?? 'Échec NFC'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),
@@ -247,16 +269,29 @@ class _HomePageState extends State<HomePage> {
                   gradient: AppColors.glassGradient,
                   borderRadius: BorderRadius.circular(16),
                   border: Border(
-                    top: BorderSide(color: AppColors.glassHighlight, width: 0.8),
+                    top: BorderSide(
+                      color: AppColors.glassHighlight,
+                      width: 0.8,
+                    ),
                     left: BorderSide(color: AppColors.glassBorder, width: 0.5),
-                    right: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 0.5),
-                    bottom: BorderSide(color: Colors.white.withValues(alpha: 0.03), width: 0.5),
+                    right: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.05),
+                      width: 0.5,
+                    ),
+                    bottom: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.03),
+                      width: 0.5,
+                    ),
                   ),
                 ),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    const Icon(Icons.notifications_none_rounded, color: AppColors.textSecondary, size: 24),
+                    const Icon(
+                      Icons.notifications_none_rounded,
+                      color: AppColors.textSecondary,
+                      size: 24,
+                    ),
                     Positioned(
                       top: 12,
                       right: 12,
@@ -411,7 +446,10 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
@@ -529,7 +567,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStatCard(IconData icon, String label, String value, String unit, Color accentColor) {
+  Widget _buildStatCard(
+    IconData icon,
+    String label,
+    String value,
+    String unit,
+    Color accentColor,
+  ) {
     return GlassCard(
       blurStrength: 24,
       borderRadius: 24,
@@ -546,11 +590,7 @@ class _HomePageState extends State<HomePage> {
                   color: accentColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  icon,
-                  size: 18,
-                  color: accentColor,
-                ),
+                child: Icon(icon, size: 18, color: accentColor),
               ),
               const SizedBox(width: 10),
               Text(
@@ -605,7 +645,10 @@ class _HomePageState extends State<HomePage> {
             GestureDetector(
               onTap: onSeeAll,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -826,7 +869,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildChallengesList(challenges) {
-
     return SizedBox(
       height: 190,
       child: ListView.builder(
@@ -838,7 +880,9 @@ class _HomePageState extends State<HomePage> {
           return GestureDetector(
             onTap: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (_) => ChallengePage(challengeId: c.id)),
+              MaterialPageRoute(
+                builder: (_) => ChallengePage(challengeId: c.id),
+              ),
             ),
             child: Container(
               width: 280,
@@ -860,10 +904,7 @@ class _HomePageState extends State<HomePage> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    CachedNetworkImage(
-                      imageUrl: c.imageUrl,
-                      fit: BoxFit.cover,
-                    ),
+                    CachedNetworkImage(imageUrl: c.imageUrl, fit: BoxFit.cover),
                     // Glass overlay at the bottom
                     Positioned(
                       left: 0,
@@ -943,7 +984,9 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(4),
                             child: LinearProgressIndicator(
                               value: c.progressPercentage / 100,
-                              backgroundColor: Colors.white.withValues(alpha: 0.2),
+                              backgroundColor: Colors.white.withValues(
+                                alpha: 0.2,
+                              ),
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 AppColors.primary,
                               ),
@@ -993,9 +1036,10 @@ class _NfcMockSheetState extends State<_NfcMockSheet>
       vsync: this,
       duration: const Duration(milliseconds: 1200),
     )..repeat(reverse: true);
-    _pulse = Tween<double>(begin: 0.85, end: 1.0).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulse = Tween<double>(
+      begin: 0.85,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -1054,7 +1098,11 @@ class _NfcMockSheetState extends State<_NfcMockSheet>
                       color: Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white70,
+                      size: 20,
+                    ),
                   ),
                 ),
               ],
@@ -1161,7 +1209,10 @@ class _NfcMockSheetState extends State<_NfcMockSheet>
                     ),
                     child: const Text(
                       'Simuler l\'écriture (mock)',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -1180,7 +1231,10 @@ class _NfcMockSheetState extends State<_NfcMockSheet>
                     ),
                     child: const Text(
                       'Annuler',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
