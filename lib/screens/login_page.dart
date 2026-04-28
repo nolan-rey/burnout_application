@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
-import '../services/mock_data_service.dart';
+import '../services/api_service.dart';
 import 'main_shell.dart';
 import 'register_page.dart';
 
@@ -78,16 +78,43 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     
     setState(() => _isLoading = true);
     HapticFeedback.lightImpact();
-    await Future.delayed(const Duration(milliseconds: 1200));
-    final service = MockDataService();
-    final success = service.login(_emailController.text, _passwordController.text);
-    setState(() => _isLoading = false);
 
-    if (!mounted) return;
-    if (success) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const MainShell()),
+    try {
+      final success = await ApiService().login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
+      if (!mounted) return;
+      if (success) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const MainShell()),
+        );
+      }
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      String msg = e.statusCode == 401
+          ? 'Email ou mot de passe incorrect'
+          : 'Erreur : ${e.message}';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(msg),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Impossible de contacter le serveur'),
+          backgroundColor: AppColors.error.withValues(alpha: 0.9),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

@@ -4,12 +4,102 @@ import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../services/mock_data_service.dart';
+import '../services/nfc_service.dart';
 import '../widgets/glass_card.dart';
 import 'challenge_page.dart';
 import 'session_detail_page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // Badge mock — sera remplacé par les données utilisateur réelles
+  static const String _mockBadge = 'BADGE:029EC135';
+
+  bool _nfcWriting = false;
+
+  Future<void> _onGymAccessTap() async {
+    HapticFeedback.mediumImpact();
+
+    final nfc = NfcService();
+    final available = await nfc.isAvailable();
+
+    if (!available) {
+      // NFC non disponible → mode mock : simule une écriture réussie
+      _showNfcMockSheet();
+      return;
+    }
+
+    setState(() => _nfcWriting = true);
+
+    await nfc.writeText(
+      payload: _mockBadge,
+      onSuccess: () {
+        if (!mounted) return;
+        setState(() => _nfcWriting = false);
+        HapticFeedback.heavyImpact();
+        _showNfcResult(success: true);
+      },
+      onError: (err) {
+        if (!mounted) return;
+        setState(() => _nfcWriting = false);
+        _showNfcResult(success: false, message: err);
+      },
+    );
+  }
+
+  /// Sheet simulant l'écriture NFC quand le NFC est indisponible (simulateur / appareil sans NFC).
+  void _showNfcMockSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (_) => _NfcMockSheet(
+        badge: _mockBadge,
+        onCancel: () => Navigator.pop(context),
+        onSimulate: () {
+          Navigator.pop(context);
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (!mounted) return;
+            HapticFeedback.heavyImpact();
+            _showNfcResult(success: true);
+          });
+        },
+      ),
+    );
+  }
+
+  void _showNfcResult({required bool success, String? message}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              success ? Icons.check_circle_rounded : Icons.error_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              success ? 'Accès accordé — Bonne séance !' : (message ?? 'Échec NFC'),
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+        backgroundColor: success
+            ? AppColors.success.withValues(alpha: 0.95)
+            : AppColors.error.withValues(alpha: 0.95),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        margin: const EdgeInsets.all(16),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +127,7 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 24),
                   _buildWelcome(user),
                   const SizedBox(height: 28),
-                  _buildGymAccessCard(),
+                  _buildGymAccessCard(context),
                   const SizedBox(height: 24),
                   _buildStats(user),
                   const SizedBox(height: 28),
@@ -287,11 +377,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildGymAccessCard() {
+  Widget _buildGymAccessCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GestureDetector(
-        onTap: () => HapticFeedback.mediumImpact(),
+        onTap: _nfcWriting ? null : _onGymAccessTap,
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(28),
@@ -386,11 +476,20 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    child: const Icon(
-                      Icons.sensors_rounded,
-                      size: 32,
-                      color: Colors.white,
-                    ),
+                    child: _nfcWriting
+                        ? const SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.sensors_rounded,
+                            size: 32,
+                            color: Colors.white,
+                          ),
                   ),
                 ),
               ),
@@ -727,6 +826,7 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildChallengesList(challenges) {
+
     return SizedBox(
       height: 190,
       child: ListView.builder(
@@ -859,6 +959,235 @@ class HomePage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// ─── Sheet NFC mock (simulateur / appareil sans NFC) ─────────────────────────
+
+class _NfcMockSheet extends StatefulWidget {
+  final String badge;
+  final VoidCallback onCancel;
+  final VoidCallback onSimulate;
+
+  const _NfcMockSheet({
+    required this.badge,
+    required this.onCancel,
+    required this.onSimulate,
+  });
+
+  @override
+  State<_NfcMockSheet> createState() => _NfcMockSheetState();
+}
+
+class _NfcMockSheetState extends State<_NfcMockSheet>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pulseCtrl;
+  late Animation<double> _pulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+    _pulse = Tween<double>(begin: 0.85, end: 1.0).animate(
+      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pulseCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A2E),
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+          width: 0.8,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(28, 28, 28, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Titre + fermer
+            Row(
+              children: [
+                const Spacer(),
+                const Text(
+                  'Prêt à scanner',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: widget.onCancel,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.close_rounded, color: Colors.white70, size: 20),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 6),
+            Text(
+              'Approchez un tag NFC',
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.white.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // Animation cercle pulsant
+            AnimatedBuilder(
+              animation: _pulse,
+              builder: (_, __) => Transform.scale(
+                scale: _pulse.value,
+                child: Container(
+                  width: 160,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.8),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.25),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        border: Border.all(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.smartphone_rounded,
+                        size: 48,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Badge info
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Text(
+                widget.badge,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.primaryLight,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 40),
+
+            // Bouton Annuler (+ simuler en mode mock)
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: widget.onSimulate,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Simuler l\'écriture (mock)',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: TextButton(
+                    onPressed: widget.onCancel,
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white70,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      backgroundColor: Colors.white.withValues(alpha: 0.07),
+                    ),
+                    child: const Text(
+                      'Annuler',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
